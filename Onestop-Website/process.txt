@@ -1,0 +1,197 @@
+Folder P3
+in that create 2 folders and 1 file 
+	1)public->used to maintain css,js files, images
+	2)views->to maintain web pages
+	3)server.js
+open cmd from P3 folder:A:\microproject\P3
+	Commands npm init
+		 	needed give description else ignore
+		 	author: Name
+		 	(refer the photo in phone)
+		 	after information type yes
+		 	now package.json file is created
+		  npm install express
+		  	after installing we can see the version of express in package.json
+		  npm install ejs
+		  npm install mongodb@3.6.6
+		  	after installing we can see the version of ejs and mongodb in package.json
+			we will observe the node_modules folder,package-lock.json file
+
+In views	
+	We create ejs files
+	->we link the files to the server pages
+	->homepage.ejs link to below pages <a href="/create">Add new Product</a>
+	      <table>
+		<tr>
+		  <th>Product id</td>
+		  ....
+		</tr>
+		<% for(var i=0;i<data.length;i++) {%>
+		<tr>
+		  <td><%= data[i].pid %></td>
+		  ....
+		</tr>
+		<% } %>
+	      </table>
+  		
+		=>data is given from server.js file
+	->add.ejs
+		=>to add data create a form 
+			<form action="/AddData" method="POST">
+			  <label>Product id</label>
+			  <input type="number" placeholder="Enter product id" name="pid"><br>
+			  ....
+			  <button type="submit">Submt</button>
+			</form>
+			<a herf="/">Home Page</a>
+		=>"/" - home page 
+		=>AddData is a server page
+	->update.ejs
+		=>to update data create a form 
+			<form action="/update" method="POST">
+			  <label>Product id</label>
+			  <input type="number" placeholder="Enter product id" name="pid"><br>
+			  ....
+			  <button type="submit">Submt</button>
+			</form>
+			<a herf="/">Home Page</a>
+		=>"/" - home page 
+		=>update is a server page
+	->delete.ejs
+		=>to update data create a form 
+			<form action="/delete" method="POST">
+			  <label>Product id</label>
+			  <input type="number" placeholder="Enter product id" name="pid"><br>
+			  ....
+			  <button type="submit">Submt</button>
+			</form>
+			<a herf="/">Home Page</a>
+		=>"/" - home page 
+		=>delete is a server page
+In public 
+	We create css file
+	->stylesheet.css
+
+In server.js
+	const express=require('express')
+	const app=express()
+	const bodyParser=require('body-parser')
+	const MongoClient= require('mongodb').MongoClient
+
+	var db;
+	var s;
+
+	//connection to database
+	MongoClient.connect('mongodb://localhost":27017/App_data', (err,database)=>{
+	  if (err) return console.log(err)
+	  db=database.db('App_data')
+
+	//to make the server listen to db
+	  app.listen(5000, ()=>{
+	    console.log("Connected to port number 5000')
+	  })
+	})
+	
+	//to set the view of server is ejs 
+	app.set('view engine', 'ejs')
+	
+	//data getting is from bodyParser module in terms of json object
+	app.use(bodyParser.urlencoded({extended: true}))
+	app.use(bodyParser.json())
+	
+	//public is the folder which we made it already available to use for server so we don't specify href="./public/styles.css"
+	//so we mention  href="styles.css"
+	app.use(express.static('public'))
+
+	//getting request
+	app.get('/', (req,res)=>{
+	  db.collection('paragon').find().toArray((err,result)=>{
+	    if(err) return console.log(err)
+	  res.render('homepage.ejs',{data: result}) //result is sent as data to homepage
+	  // all the records as objects and objects as array is sent to homepage
+	  })
+	})
+	
+	//to load add.ejs file
+	app.get('/create', (req,res)=>{
+	  res.render('add.ejs')
+	})
+
+	//to load update.ejs file
+	app.get('/updatestock', (req,res)=>{
+	  res.render('update.ejs')
+	})
+
+	//to load delete.ejs file
+	app.get('/deleteproduct', (req,res)=>{
+	  res.render('delete.ejs')
+	})
+
+	app.post('/AddData', (req,res)=>{
+	  db.collection('paragon').save(req.body,(err,result)=>{
+	    if(err) return console.log(err)
+	  res.redirect('/')
+	})
+	})
+	
+	app.post('/update', (req,res)=>{
+	  db.collection('paragon').find().toArray((err, result)=>{
+	    if(err) return console.log(err)
+	  for(var i=0;i<result.length;i++){
+	    if(result[i].pid == req.body.id){
+	      s=result[i].stock
+	      break
+	    }
+ 	  }
+	  db.collection('paragon').findOneAndUpdate({pid: req.body.id}, {
+	    $set: {stock: parseInt(s) + parseInt(req.body.stock)}}, {sort: {_id: -1}},
+	    (err,result)=> {
+	      if(err) return res.send(err)
+	    console.log(req.body.id+' stock update')
+	    res.redirect('/')
+	    })
+	  })
+	})
+
+	app.post('/delete', (req,res)=>{
+	  db.collection('paragon').findOneAndDelete({pid: req.body.id}, (err,result)=>{
+	    if(err) return console.log(err)
+	  res.redirect('/')
+	  })
+	})
+
+To run we need to install nodemon 
+next to run we use nodemon server.js
+open cmd from P3 folder:A:\microproject\P3
+	Commands npm install nodemon
+		 npm install -g nodemon
+		 nodemon server.js
+localhost:5000
+request will send to localhost:5000
+	  
+
+
+BOOTSTRAP:
+adminlte.io 3.1.0 version
+->unzip the zip file 
+ ->dist and plugins folder and put in public file
+
+4 clases for layout
+->wrapper=complete webpage
+->main-header=contains logo and navbar
+->sidebar-wrapper=side nav
+->content-wrapper= for content and page header
+
+
+sample page=adminlte/pages/examples/projects
+from here only the needed data can be taken and can be used
+
+
+Project task:
+->static webpage with bootstrap
+->connect server with database check the data is being retrieved on webpage/server or not
+  dynamic data should be added
+->to build application with all 4 applications add,delete,update,home
+
+
+Doubts: kmitmicroprojects@gmail.com
